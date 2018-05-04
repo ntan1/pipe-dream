@@ -1,3 +1,9 @@
+// To do: fix board
+// To do: start and end sections
+// To do: countdown
+// To do: water flow
+// To do: levels, score, difficulty ramp
+
 $(document).ready(function () {
 
     // game settings
@@ -21,31 +27,67 @@ $(document).ready(function () {
 
 
     // Pipe Object
-    function Pipe(type) {
+    function Pipe(name, type) {
+        this.name = name
         this.north = type.north;
         this.east = type.east;
         this.south = type.south;
         this.west = type.west;
     }
-    test = new Pipe(pieceTypes.topRight);
+    // test = new Pipe(pieceTypes.topRight);
     // console.log(test);
     createBoard();
     var pile = new Pile(VISIBLE_PIECES);
     console.log(pile.getPile());
-    
+    updateBoardPile();
+
     // Pile Object
     function Pile(visible_pieces) {
         this.pile = [];
         var keys = Object.keys(pieceTypes);
-        for (var i = 0; i < visible_pieces; i++) {
-            // generate random piece type
+        this.generatePiece = function () {
             var type = keys[Math.floor(Math.random() * keys.length)];
             console.log(type);
-            var temp_pipe = new Pipe(pieceTypes[type]);
-            this.pile.push(temp_pipe);
+            var temp_pipe = new Pipe(type, pieceTypes[type]);
+            this.pile.unshift(temp_pipe);
         }
-        this.getPile = function() {
+        this.getPile = function () {
             return this.pile;
+        }
+        this.removePiece = function () {
+            this.pile.pop();
+        }
+        for (var i = 0; i < visible_pieces; i++) {
+            // generate random piece type
+            // var type = keys[Math.floor(Math.random() * keys.length)];
+            // console.log(type);
+            // var temp_pipe = new Pipe(type, pieceTypes[type]);
+            // this.pile.push(temp_pipe);
+            this.generatePiece();
+        }
+    }
+
+    $("#board").on("click", ".block", function () {
+        if ($(this).find("img").length == 0) {
+            $(this).html($(".current").find("img").clone());
+            pile.removePiece();
+            pile.generatePiece();
+            updateBoardPile();
+        }
+    });
+
+    // update pile in document
+    function updateBoardPile() {
+        $("#pile").html("");
+        for (var i = 0; i < pile.pile.length; i++) {
+            var piece = document.createElement("li");
+            if (i === pile.pile.length - 1) {
+                $(piece).attr({ id: "next" + i, class: pile.pile[i].name, class: "current" });
+            } else {
+                $(piece).attr({ id: "next" + i, class: pile.pile[i].name });
+            }
+            $(piece).html("<img src='assets/images/" + pile.pile[i].name + ".png'>");
+            $("#pile").append(piece);
         }
     }
 
