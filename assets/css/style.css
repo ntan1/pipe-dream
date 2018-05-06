@@ -12,17 +12,18 @@ header {
 }
 
 .row {
-    overflow: auto;
+    display: flex;
+    justify-content: center;
 }
 
 .block {
     width: 50px;
     height: 50px;
     border: 1px solid black;
-    display: inline-block;
+    /* display: inline-block;
     padding: 0;
     margin: 0;
-    float: left;
+    float: left; */
     /* box-sizing: border-box;
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box; */
@@ -41,4 +42,62 @@ header {
 
 .current {
     border: 2px solid black;
+}
+
+.bottom-left {
+    transform: rotate(-90deg);
+}
+
+.top-right {
+    transform: rotate(90deg);
+}
+
+.bottom-right {
+    transform: rotate(180deg);
+}
+
+.top-left.reverse {
+    -moz-transform: scaleX(-1) rotate(90deg);
+    -o-transform: scaleX(-1) rotate(90deg);
+    -webkit-transform: scaleX(-1) rotate(90deg);
+    transform: scaleX(-1) rotate(90deg);
+}
+
+.top-right.reverse {
+    -moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+}
+
+.bottom-left.reverse {
+    -moz-transform: scaleY(-1);
+    -o-transform: scaleY(-1);
+    -webkit-transform: scaleY(-1);
+    transform: scaleY(-1);
+}
+
+.bottom-right.reverse {
+    -moz-transform: scaleY(-1) rotate(90deg);
+    -o-transform: scaleY(-1) rotate(90deg);
+    -webkit-transform: scaleY(-1) rotate(90deg);
+    transform: scaleY(-1) rotate(90deg);
+}
+
+.straight.reverse {
+    -moz-transform: scaleY(-1) rotate(180deg);
+    -o-transform: scaleY(-1) rotate(180deg);
+    -webkit-transform: scaleY(-1) rotate(180deg);
+    transform: scaleY(-1) rotate(180deg);
+}
+
+/* end no work */
+.reverse-x {
+    /* -moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scale(-1, 1); */
+    animation-direction: alternate-reverse;
+    filter: FlipH;
+    -ms-filter: "FlipH";
 }

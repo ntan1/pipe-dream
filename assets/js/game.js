@@ -7,8 +7,8 @@
 $(document).ready(function () {
 
     // game settings
-    var ROWS = 8;
-    var ROWS = 10;
+    var ROWS = 6;
+    var COLS = 8;
     var VISIBLE_PIECES = 4;
 
     // pieces
@@ -47,7 +47,6 @@ $(document).ready(function () {
         var keys = Object.keys(pieceTypes);
         this.generatePiece = function () {
             var type = keys[Math.floor(Math.random() * keys.length)];
-            console.log(type);
             var temp_pipe = new Pipe(type, pieceTypes[type]);
             this.pile.unshift(temp_pipe);
         }
@@ -67,12 +66,40 @@ $(document).ready(function () {
         }
     }
 
+    // water object
+    function Water() {
+        this.generatePoint = function(text) {
+            var x = Math.floor(Math.random()*COLS);
+            var y = Math.floor(Math.random()*ROWS);
+            console.log("x " + x);
+            console.log("y " + y);
+            var row = $("#board").find(".row[data-index='" + y + "']");
+            var col = $(row).find("span[data-index='" + x + "']");
+            $(col).text(text);
+            console.log(row);
+            console.log(col);
+        }
+        this.setDirection = function() {
+            var directions = ["north", "east", "south", "west"]
+            var direction = directions[Math.floor(Math.random()*4)];
+            return direction;
+        }
+        this.direction = this.setDirection();
+        this.start = this.generatePoint("start");
+        this.end = this.generatePoint("end");
+
+    }
+
+    var water = new Water();
+    console.log(water.direction);
+
     $("#board").on("click", ".block", function () {
         if ($(this).find("img").length == 0) {
             $(this).html($(".current").find("img").clone());
             pile.removePiece();
             pile.generatePiece();
             updateBoardPile();
+            console.log();
         }
     });
 
@@ -80,7 +107,7 @@ $(document).ready(function () {
     function updateBoardPile() {
         $("#pile").html("");
         for (var i = 0; i < pile.pile.length; i++) {
-            var piece = document.createElement("li");
+            var piece = $("<div>");
             if (i === pile.pile.length - 1) {
                 $(piece).attr({ id: "next" + i, class: pile.pile[i].name, class: "current" });
             } else {
@@ -95,17 +122,19 @@ $(document).ready(function () {
     function createBoard() {
         var board = $("#board");
         for (var i = 0; i < ROWS; i++) {
-            var divRow = document.createElement("div");
+            var divRow = $("<div>");
             $(divRow).attr({
                 id: "row" + i,
-                class: "row"
+                class: "row",
+                "data-index": i
             });
             board.append(divRow);
-            for (var z = 0; z < ROWS; z++) {
-                var block = document.createElement("span");
+            for (var z = 0; z < COLS; z++) {
+                var block = $("<span>");
                 $(block).attr({
                     id: "block" + i + z,
-                    class: "block"
+                    class: "block",
+                    "data-index": z
                 });
                 $(block).text("P");
                 board.find("#row" + i).append(block);
