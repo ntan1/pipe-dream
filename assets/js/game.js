@@ -3,12 +3,13 @@
 // To do: countdown
 // To do: water flow
 // To do: levels, score, difficulty ramp
+// To do: fix cross img
 
 $(document).ready(function () {
 
     // game settings
-    var ROWS = 6;
-    var COLS = 8;
+    var ROWS = 8;
+    var COLS = 10;
     var VISIBLE_PIECES = 4;
 
     // pieces
@@ -22,7 +23,7 @@ $(document).ready(function () {
         vertical: { north: true, east: false, south: true, west: false },
         horizontal: { north: false, east: true, south: false, west: true },
         // cross piece
-        cross: { north: true, east: true, south: true, west: true }
+        //cross: { north: true, east: true, south: true, west: true }
     };
 
 
@@ -33,12 +34,27 @@ $(document).ready(function () {
         this.east = type.east;
         this.south = type.south;
         this.west = type.west;
+        if (name == "horizontal") {
+            this.img = "<img src='assets/images/straight.png' class='straight'>"
+        } else if (name == "vertical") {
+            this.img = "<img src='assets/images/straight.png' class='vertical-straight'>"
+        } else if (name == "topRight") {
+            this.img = "<img src='assets/images/curve.png' class='top-right'>"
+        } else if (name == "bottomRight") {
+            this.img = "<img src='assets/images/curve.png' class='bottom-right'>"
+        } else if (name == "topLeft") {
+            this.img = "<img src='assets/images/curve.png' class='top-left'>"
+        } else if (name == "bottomLeft") {
+            this.img = "<img src='assets/images/curve.png' class='bottom-left'>"
+        } else if (name == "cross") {
+            this.img = "<img src='assets/images/straight.png' class='straight'><img src='assets/images/straight.png' class='vertical-straight'>"
+        }
     }
     // test = new Pipe(pieceTypes.topRight);
     // console.log(test);
     createBoard();
     var pile = new Pile(VISIBLE_PIECES);
-    console.log(pile.getPile());
+    // console.log(pile.getPile());
     updateBoardPile();
 
     // Pile Object
@@ -68,25 +84,46 @@ $(document).ready(function () {
 
     // water object
     function Water() {
-        this.generatePoint = function(text) {
-            var x = Math.floor(Math.random()*COLS);
-            var y = Math.floor(Math.random()*ROWS);
-            console.log("x " + x);
-            console.log("y " + y);
+        this.path = {};
+        this.generatePoint = function (text) {
+            var x = Math.floor(Math.random() * COLS);
+            var y = Math.floor(Math.random() * ROWS);
+            var type = "horizontal";
+            this.path[x] = { [y]: type };
+            console.log(text + " x " + x);
+            console.log(text + " y " + y);
             var row = $("#board").find(".row[data-index='" + y + "']");
             var col = $(row).find("span[data-index='" + x + "']");
-            $(col).text(text);
-            console.log(row);
-            console.log(col);
+            $(col).html("<img src='assets/images/straight.png'>");
         }
-        this.setDirection = function() {
-            var directions = ["north", "east", "south", "west"]
-            var direction = directions[Math.floor(Math.random()*4)];
+        this.setDirection = function (direction = "") {
+            if (direction == "") {
+                var directions = ["north", "east", "south", "west"]
+                direction = directions[Math.floor(Math.random() * 4)];
+            } else {
+                direction = direction
+            }
             return direction;
         }
-        this.direction = this.setDirection();
+        this.addToPath = function (x, y, pipe) {
+            this.path[x] = { [y]: pipe };
+            console.log(this.path);
+        }
+        this.checkConnected = function (x, y, pipe) {
+            console.log(pipe.west);
+            if (this.direction == "east" && pipe.west) {
+                console.log("true");
+                return true;
+            } else {
+                console.log("false");
+                return false;
+            }
+            console.log(this.path.length);
+            return true;
+        }
+        this.direction = this.setDirection("east");
         this.start = this.generatePoint("start");
-        this.end = this.generatePoint("end");
+        // this.end = this.generatePoint("end");
 
     }
 
@@ -96,10 +133,19 @@ $(document).ready(function () {
     $("#board").on("click", ".block", function () {
         if ($(this).find("img").length == 0) {
             $(this).html($(".current").find("img").clone());
+            var rowIndex = $(this).parent().data("index");
+            var colIndex = $(this).data("index");
+            var type = pile.pile[VISIBLE_PIECES-1].name;
+            if (water.checkConnected(rowIndex, colIndex, pile.pile[VISIBLE_PIECES-1])) {
+                water.addToPath(rowIndex, colIndex, pile.pile[VISIBLE_PIECES-1]);
+            }
             pile.removePiece();
             pile.generatePiece();
+            console.log($(this).parent().data("index"));
+            console.log($(this).data("index"));
             updateBoardPile();
-            console.log();
+            // var img = $(this).find("img").attr("src");
+            // $(this).find("img").attr({src: img.replace("png", "gif")});
         }
     });
 
@@ -109,11 +155,12 @@ $(document).ready(function () {
         for (var i = 0; i < pile.pile.length; i++) {
             var piece = $("<div>");
             if (i === pile.pile.length - 1) {
-                $(piece).attr({ id: "next" + i, class: pile.pile[i].name, class: "current" });
+                $(piece).attr({ id: "next" + i });
+                $(piece).addClass(pile.pile[i].name + " current");
             } else {
                 $(piece).attr({ id: "next" + i, class: pile.pile[i].name });
             }
-            $(piece).html("<img src='assets/images/" + pile.pile[i].name + ".png'>");
+            $(piece).html(pile.pile[i].img);
             $("#pile").append(piece);
         }
     }
