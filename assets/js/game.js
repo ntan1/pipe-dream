@@ -1,7 +1,6 @@
-// To do: fix board
-// To do: start and end sections
-// To do: countdown
-// To do: water flow
+// To do: water flow set new direction
+// To do: end sections
+// To do: countdown - setinterval
 // To do: levels, score, difficulty ramp
 // To do: fix cross img
 
@@ -88,6 +87,8 @@ $(document).ready(function () {
         this.generatePoint = function (text) {
             var x = Math.floor(Math.random() * COLS);
             var y = Math.floor(Math.random() * ROWS);
+            this.x = x;
+            this.y = y;
             var type = "horizontal";
             this.path[x] = { [y]: type };
             console.log(text + " x " + x);
@@ -101,7 +102,7 @@ $(document).ready(function () {
                 var directions = ["north", "east", "south", "west"]
                 direction = directions[Math.floor(Math.random() * 4)];
             } else {
-                direction = direction
+                direction = direction;
             }
             return direction;
         }
@@ -109,17 +110,41 @@ $(document).ready(function () {
             this.path[x] = { [y]: pipe };
             console.log(this.path);
         }
-        this.checkConnected = function (x, y, pipe) {
-            console.log(pipe.west);
-            if (this.direction == "east" && pipe.west) {
+        this.checkConnected = function (x, y) {
+            // console.log("next x: " + x);
+            // console.log("next y: " + y);
+            var pipe = this.path;
+            if (this.direction == "east" && pipe[this.x+1][this.y].west) {
+                this.x = x;
+                console.log("true");
+                return true;
+            } else if (this.direction == "west" && pipe[this.x-1][this.y].east) {
+                this.x = x;
+                console.log("true");
+                return true;
+            } else if (this.direction == "north" && pipe[this.x][this.y-1].south) {
+                this.y = y;
+                console.log("true");
+                return true;
+            } else if (this.direction == "south" && pipe[this.x][this.y+1].north) {
+                this.y = y;
                 console.log("true");
                 return true;
             } else {
                 console.log("false");
                 return false;
             }
-            console.log(this.path.length);
-            return true;
+        }
+        var _this = this;
+        this.startFlow = function () {
+            setTimeout(function () {
+                // if (_this.checkConnected(_this.x+1, _this.y)) {
+                if (_this.checkConnected()) {
+                    console.log("connected");
+                } else {
+                    console.log("You lose");
+                }
+            }, 1000);
         }
         this.direction = this.setDirection("east");
         this.start = this.generatePoint("start");
@@ -133,12 +158,13 @@ $(document).ready(function () {
     $("#board").on("click", ".block", function () {
         if ($(this).find("img").length == 0) {
             $(this).html($(".current").find("img").clone());
-            var rowIndex = $(this).parent().data("index");
-            var colIndex = $(this).data("index");
-            var type = pile.pile[VISIBLE_PIECES-1].name;
-            if (water.checkConnected(rowIndex, colIndex, pile.pile[VISIBLE_PIECES-1])) {
-                water.addToPath(rowIndex, colIndex, pile.pile[VISIBLE_PIECES-1]);
-            }
+            var rowIndex = $(this).data("index");
+            var colIndex = $(this).parent().data("index");
+            var type = pile.pile[VISIBLE_PIECES - 1].name;
+            console.log(pile.pile[VISIBLE_PIECES - 1]);
+            // if (water.checkConnected(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1])) {
+                water.addToPath(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1]);
+            // }
             pile.removePiece();
             pile.generatePiece();
             console.log($(this).parent().data("index"));
@@ -188,4 +214,8 @@ $(document).ready(function () {
             }
         }
     }
+
+    var flow = setInterval(function () {
+        water.startFlow();
+    }, 2000);
 });
