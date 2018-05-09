@@ -2,6 +2,10 @@ h1 {
     font-size: 2em;
 }
 
+main {
+    text-align: center;
+}
+
 header {
     text-align: center;
     margin-bottom: 20px;
@@ -9,6 +13,18 @@ header {
 
 #board {
     text-align: center;
+}
+
+#start {
+    background-color: #57d457;
+    border: 2px solid black;
+    padding: 10px;
+    position: absolute;
+    top: 50%;
+    color: white;
+    font-size: 2em;
+    text-transform: uppercase;
+    cursor: pointer;
 }
 
 .row {
@@ -35,10 +51,17 @@ header {
     background-color: rgb(0, 0, 0, 0.3);
 }
 
-#sidebar {
+.sidebar {
     position: absolute;
     padding: 2em;
+}
+
+.left {
     left: 0;
+}
+
+.right {
+    right: 0;
 }
 
 #pile {
