@@ -139,7 +139,7 @@ header {
 .curve {
     width: 100px;
     height: 100px;
-    background: url("../images/curve-full.png") left center no-repeat; 
+    background: url("../images/curve-full.png") right center no-repeat; 
     background-size: auto 100%;
     animation: play 2s steps(24);
     animation-play-state: paused;
@@ -148,7 +148,7 @@ header {
 .straight {
     width: 100px;
     height: 100px;
-    background: url("../images/straight-full.png") left center no-repeat; 
+    background: url("../images/straight-full.png") right center no-repeat; 
     background-size: auto 100%;    
     animation: play-straight 2s steps(19);
     animation-play-state: paused;
@@ -157,7 +157,7 @@ header {
 .end {
     width: 100px;
     height: 100px;
-    background: url("../images/end-full.png") left center no-repeat; 
+    background: url("../images/end-full.png") right center no-repeat; 
     background-size: auto 100%;    
     animation: play-end 2s steps(14);
     animation-play-state: paused;  
@@ -182,20 +182,18 @@ header {
 .test-vertical {
     width: 100px;
     height: 100px;
-    background: url("../images/straight-full.png") left center no-repeat; 
+    background: url("../images/straight-full.png") right center no-repeat; 
     animation: play-straight 1s steps(19);
     background-size: auto 100%;
-    animation-fill-mode: forwards;
 }
 
 .test-2 {
     transform: rotate(90deg);
     width: 100px;
     height: 100px;
-    background: url("../images/straight-full.png") left center no-repeat; 
+    background: url("../images/straight-full.png") right center no-repeat; 
     animation: play-straight 1s steps(19);
     background-size: auto 100%;
-    animation-fill-mode: forwards;
 }
 
 .test-img {
