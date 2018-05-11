@@ -10,7 +10,7 @@ $(document).ready(function () {
     const ROWS = 8;
     const COLS = 10;
     const VISIBLE_PIECES = 4;
-    const TIME_TO_START = 8000;
+    const TIME_TO_START = 1000;
     const WATER_SPEED = 3000;
     const WON = false;
     let score = 0;
@@ -20,6 +20,7 @@ $(document).ready(function () {
     const notAllowed = new Audio("assets/sounds/no.mp3");
     const lose = new Audio("assets/sounds/lose.mp3");
     const start = new Audio("assets/sounds/start.mp3");
+    const pass = new Audio("assets/sounds/pass.mp3");
 
     // pieces, properties are directions for incoming flow and values are outgoing flow
     const pieceTypes = {
@@ -72,6 +73,14 @@ $(document).ready(function () {
         //cross: { north: true, east: true, south: true, west: true }
     };
 
+    const specialPieces = {
+        end: {
+            east: "west",
+            west: "east",
+            passed: false
+        }
+    };
+
 
     // Pipe Object, sets appropriate image depending on piece type
     function Pipe(name, type) {
@@ -83,21 +92,40 @@ $(document).ready(function () {
         // this.south = type.south;
         // this.west = type.west;
         if (name == "horizontal") {
-            this.img = "<img src='assets/images/straight.png' class='straight'>";
+            this.class = "straight";
         } else if (name == "vertical") {
-            this.img = "<img src='assets/images/straight.png' class='vertical-straight'>";
+            this.class = "straight vertical-straight";
         } else if (name == "topRight") {
-            this.img = "<img src='assets/images/curve.png' class='top-right'>";
+            this.class = "curve top-right";
         } else if (name == "bottomRight") {
-            this.img = "<img src='assets/images/curve.png' class='bottom-right'>";
+            this.class = "curve bottom-right";
         } else if (name == "topLeft") {
-            this.img = "<img src='assets/images/curve.png' class='top-left'>";
+            this.class = "curve top-left";
         } else if (name == "bottomLeft") {
-            this.img = "<img src='assets/images/curve.png' class='bottom-left'>";
+            this.class = "curve bottom-left";
+        } else if (name == "end") {
+            // this.img = "<img src='assets/images/straight.png' class='straight'><img src='assets/images/straight.png' class='vertical-straight'>";
+            this.class = "end";
         } else if (name == "cross") {
             // this.img = "<img src='assets/images/straight.png' class='straight'><img src='assets/images/straight.png' class='vertical-straight'>";
-            this.img = "<img src='assets/images/cross.png' class='vertical-straight'>";
-        }
+            this.class = "vertical-straight straight";
+        } 
+        // if (name == "horizontal") {
+        //     this.img = "<img src='assets/images/straight.png' class='straight'>";
+        // } else if (name == "vertical") {
+        //     this.img = "<img src='assets/images/straight.png' class='vertical-straight'>";
+        // } else if (name == "topRight") {
+        //     this.img = "<img src='assets/images/curve.png' class='top-right'>";
+        // } else if (name == "bottomRight") {
+        //     this.img = "<img src='assets/images/curve.png' class='bottom-right'>";
+        // } else if (name == "topLeft") {
+        //     this.img = "<img src='assets/images/curve.png' class='top-left'>";
+        // } else if (name == "bottomLeft") {
+        //     this.img = "<img src='assets/images/curve.png' class='bottom-left'>";
+        // } else if (name == "cross") {
+        //     // this.img = "<img src='assets/images/straight.png' class='straight'><img src='assets/images/straight.png' class='vertical-straight'>";
+        //     this.img = "<img src='assets/images/cross.png' class='vertical-straight'>";
+        // }
     }
     // test = new Pipe(pieceTypes.topRight);
     // console.log(test);
@@ -160,17 +188,18 @@ $(document).ready(function () {
             } else {
                 x = Math.floor(Math.random() * COLS);
             }
-            let type = "horizontal";
+            let type = "end";
             // this.path[x] = { [y]: new Pipe("horizontal", pieceTypes.horizontal) };
             // this.path[x] = [];
             // this.path[x][y] = new Pipe("horizontal", pieceTypes.horizontal);
-            this.addToPath(x, y, new Pipe("horizontal", pieceTypes.horizontal));
+            this.addToPath(x, y, new Pipe("end", specialPieces.end));
             this.path[x][y].passed = true;
             console.log(text + " x " + x);
             console.log(text + " y " + y);
             let row = $("#board").find(".row[data-index='" + y + "']");
             let col = $(row).find("span[data-index='" + x + "']");
-            $(col).html("<img src='assets/images/straight.png'>");
+            // $(col).html("<img src='assets/images/straight.png'>");
+            $(col).html("<div class='end'>");
             return { x: x, y: y };
         }
         // future: set direction to either flow of starting pipe
@@ -206,11 +235,13 @@ $(document).ready(function () {
         this.checkConnected = function () {
             // console.log("next x: " + x);
             // console.log("next y: " + y);
+            // console.log($(".row[data-index='" + this.x + "']").find(".block[data-index='" + this.y + "']"));
+            $(".row[data-index='" + _this.y + "']").find(".block[data-index='" + _this.x + "']").find("div").addClass("anim");
             console.log(this.path);
             let pipe = this.path;
             if (this.x + 1 == this.end.x && pipe[this.x][this.y].flow.hasOwnProperty("east")) {
                 console.log("You won");
-                return true;
+                return false;
             } else if (this.direction == "east" && this.x + 1 < COLS) {
                 if (pipe[this.x + 1][this.y].flow.hasOwnProperty("west")) {
                     this.path[this.x + 1][this.y].passed = true;
@@ -257,6 +288,7 @@ $(document).ready(function () {
                 // if (_this.checkConnected(_this.x+1, _this.y)) {
                 if (_this.checkConnected()) {
                     console.log("connected");
+                    pass.play();
                     score += 100;
                     $("#score").text(score);
                 } else {
@@ -281,12 +313,16 @@ $(document).ready(function () {
         if (!water.path[rowIndex][colIndex].passed) {
             if ($(this).find("img").length > 0) {
                 score -= 50;
+                if (score < 0) {
+                    score = 0;
+                }
                 $("#score").text(score);
             }
             // let type = pile.pile[VISIBLE_PIECES - 1].name;
             // console.log(pile.pile[VISIBLE_PIECES - 1]);
             // if (water.checkConnected(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1])) {
-            $(this).html($(".current").find("img").clone());
+            // $(this).html($(".current").find("img").clone());
+            $(this).html($(".current").removeClass("current"));
             water.addToPath(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1]);
             // }
             pile.removePiece();
@@ -311,11 +347,13 @@ $(document).ready(function () {
             let piece = $("<div>");
             if (i === pile.pile.length - 1) {
                 $(piece).attr({ id: "next" + i });
-                $(piece).addClass(pile.pile[i].name + " current");
+                $(piece).addClass(pile.pile[i].class + " current");
             } else {
-                $(piece).attr({ id: "next" + i, class: pile.pile[i].name });
+                $(piece).attr({ id: "next" + i });
+                // $(piece).addClass(pile.pile[i].name + " " + pile.pile[i].class);
+                $(piece).addClass(pile.pile[i].class);
             }
-            $(piece).html(pile.pile[i].img);
+            // $(piece).html(pile.pile[i].img);
             $("#pile").append(piece);
         }
     }
