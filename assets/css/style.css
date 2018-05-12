@@ -4,6 +4,7 @@ h1 {
 
 main {
     text-align: center;
+    position: relative;
 }
 
 header {
@@ -20,11 +21,12 @@ header {
     border: 2px solid black;
     padding: 10px;
     position: absolute;
-    top: 50%;
     color: white;
     font-size: 2em;
     text-transform: uppercase;
     cursor: pointer;
+    top: 50%;
+    transform: translate(-50%, -77%);
 }
 
 .row {
