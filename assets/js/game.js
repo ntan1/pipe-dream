@@ -10,17 +10,31 @@ $(document).ready(function () {
     const ROWS = 8;
     const COLS = 10;
     const VISIBLE_PIECES = 4;
-    const TIME_TO_START = 1000;
-    const WATER_SPEED = 3000;
+    const TIME_TO_START = 10000;
+    const WATER_SPEED = 2000;
     const WON = false;
     let score = 0;
+    const vol = 0.4;
 
     // sounds
-    const placed = new Audio("assets/sounds/yes.mp3");
-    const notAllowed = new Audio("assets/sounds/no.mp3");
-    const lose = new Audio("assets/sounds/lose.mp3");
-    const start = new Audio("assets/sounds/start.mp3");
-    const pass = new Audio("assets/sounds/pass.mp3");
+    const audio = {
+        placed: new Audio("assets/sounds/yes.mp3"),
+        notAllowed: new Audio("assets/sounds/no.mp3"),
+        lose: new Audio("assets/sounds/lose.mp3"),
+        start: new Audio("assets/sounds/start.mp3"),
+        pass: new Audio("assets/sounds/pass.mp3")
+    }
+
+    // reduce volume
+    for (let sounds in audio) {
+        audio[sounds].volume = vol;
+    }
+    $("#bg-music")[0].volume = vol;
+    // const placed = new Audio("assets/sounds/yes.mp3");
+    // const notAllowed = new Audio("assets/sounds/no.mp3");
+    // const lose = new Audio("assets/sounds/lose.mp3");
+    // const start = new Audio("assets/sounds/start.mp3");
+    // const pass = new Audio("assets/sounds/pass.mp3");
 
     // pieces, properties are directions for incoming flow and values are outgoing flow
     const pieceTypes = {
@@ -61,14 +75,14 @@ $(document).ready(function () {
             normal: "west",
             passed: false
         },
-        // cross: {
-        //     north: "south",
-        //     south: "north",
-        //     east: "west",
-        //     west: "east",
-        //     normal: "west", // FIND SOLN
-        //     passed: false
-        // },
+        cross: {
+            north: "south",
+            south: "north",
+            east: "west",
+            west: "east",
+            normal: "west south", // FIND SOLN
+            passed: false
+        },
         // topRight: { north: false, east: false, south: true, west: true },
         // bottomRight: { north: true, east: false, south: false, west: true },
         // topLeft: { north: false, east: true, south: true, west: false },
@@ -84,6 +98,7 @@ $(document).ready(function () {
         end: {
             east: "west",
             west: "east",
+            normal: "west",
             passed: false
         }
     };
@@ -101,7 +116,7 @@ $(document).ready(function () {
         if (name == "horizontal") {
             this.class = "straight";
         } else if (name == "vertical") {
-            this.class = "straight vertical-straight";
+            this.class = "vertical-straight";
         } else if (name == "topRight") {
             this.class = "curve top-right";
         } else if (name == "bottomRight") {
@@ -115,7 +130,7 @@ $(document).ready(function () {
             this.class = "end";
         } else if (name == "cross") {
             // this.img = "<img src='assets/images/straight.png' class='straight'><img src='assets/images/straight.png' class='vertical-straight'>";
-            this.class = "vertical-straight straight";
+            this.class = "straight";
         }
         // if (name == "horizontal") {
         //     this.img = "<img src='assets/images/straight.png' class='straight'>";
@@ -241,12 +256,25 @@ $(document).ready(function () {
         }
         this.reverse = function (direction) {
             let currentPipe = $(".row[data-index='" + this.y + "']").find(".block[data-index='" + this.x + "']").find("div");
-            if (this.path[this.x][this.y].flow.normal != direction) {
-                $(currentPipe).addClass("reverse");
+            if (!this.path[this.x][this.y].flow.normal.includes(direction)) {
+                if (this.path[this.x][this.y].name == "cross") {
+                    if (direction == "east") {
+                        currentPipe.addClass("reverse");
+                    } else if (direction == "north") {
+                        currentPipe.find("div").addClass("reverse");
+                    }
+                } else {
+                    $(currentPipe).addClass("reverse");
+                }
             }
         }
         this.animate = function () {
-            $(".row[data-index='" + this.y + "']").find(".block[data-index='" + this.x + "']").find("div").addClass("anim");
+            let currentPipe = $(".row[data-index='" + this.y + "']").find(".block[data-index='" + this.x + "']").find("div")
+            if (["north", "south"].includes(this.direction) && this.path[this.x][this.y].name == "cross") {
+                $(currentPipe).find("div").addClass("anim-vert-cross");
+            } else {
+                $(currentPipe).addClass("anim");
+            }
         }
         this.checkConnected = function () {
             // console.log("next x: " + x);
@@ -300,7 +328,7 @@ $(document).ready(function () {
             // lost
             console.log("You lose");
             $("#bg-music").get(0).pause();
-            lose.play();
+            audio.lose.play();
             return false;
         }
         let _this = this;
@@ -311,7 +339,7 @@ $(document).ready(function () {
                 _this.animate();
                 if (_this.checkConnected()) {
                     console.log("connected");
-                    pass.play();
+                    audio.pass.play();
                     score += 100;
                     $("#score").text(score);
                 } else {
@@ -350,16 +378,16 @@ $(document).ready(function () {
             // }
             pile.removePiece();
             pile.generatePiece();
-            placed.play();
-            placed.currentTime = 0;
+            audio.placed.play();
+            audio.placed.currentTime = 0;
             // console.log($(this).parent().data("index"));
             // console.log($(this).data("index"));
             updateBoardPile();
             // let img = $(this).find("img").attr("src");
             // $(this).find("img").attr({src: img.replace("png", "gif")});
         } else {
-            notAllowed.play();
-            notAllowed.currentTime = 0;
+            audio.notAllowed.play();
+            audio.notAllowed.currentTime = 0;
         }
     });
 
@@ -369,13 +397,20 @@ $(document).ready(function () {
         for (let i = 0; i < pile.pile.length; i++) {
             let piece = $("<div>");
             if (i === pile.pile.length - 1) {
-                $(piece).attr({ id: "next" + i });
-                $(piece).addClass(pile.pile[i].class + " current");
-            } else {
-                $(piece).attr({ id: "next" + i });
-                // $(piece).addClass(pile.pile[i].name + " " + pile.pile[i].class);
-                $(piece).addClass(pile.pile[i].class);
+                // $(piece).attr({ id: "next" + i });
+                $(piece).addClass("current");
             }
+            if (pile.pile[i].name === "cross") {
+                let horizontal = $("<div>");
+                $(horizontal).addClass("vertical-cross vertical-straight");
+                $(piece).html(horizontal);
+            }
+            // else {
+            //     $(piece).attr({ id: "next" + i });
+            //     $(piece).addClass(pile.pile[i].class);
+            // }
+            $(piece).attr({ id: "next" + i });
+            $(piece).addClass(pile.pile[i].class);
             // $(piece).html(pile.pile[i].img);
             $("#pile").append(piece);
         }
@@ -406,14 +441,14 @@ $(document).ready(function () {
     }
 
     $("#start").on("click", function () {
-        start.play();
+        audio.start.play();
         $(this).hide();
         setTimeout(function () {
             let flow = setTimeout(function () {
                 water.startFlow();
             }, TIME_TO_START);
             $("#bg-music").get(0).play(); // get(0) audio object from element
-        }, start.duration * 1000);
+        }, audio.start.duration * 1000);
     })
 
 });
