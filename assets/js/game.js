@@ -28,40 +28,47 @@ $(document).ready(function () {
         topRight: {
             south: "west",
             west: "south",
+            normal: "west",
             passed: false
         },
         bottomRight: {
             north: "west",
             west: "north",
+            normal: "north",
             passed: false
         },
         topLeft: {
             south: "east",
             east: "south",
+            normal: "south",
             passed: false
         },
         bottomLeft: {
             north: "east",
             east: "north",
+            normal: "east",
             passed: false
         },
         vertical: {
             south: "north",
             north: "south",
+            normal: "south",
             passed: false
         },
         horizontal: {
             east: "west",
             west: "east",
+            normal: "west",
             passed: false
         },
-        cross: {
-            north: "south",
-            south: "north",
-            east: "west",
-            west: "east",
-            passed: false
-        },
+        // cross: {
+        //     north: "south",
+        //     south: "north",
+        //     east: "west",
+        //     west: "east",
+        //     normal: "west", // FIND SOLN
+        //     passed: false
+        // },
         // topRight: { north: false, east: false, south: true, west: true },
         // bottomRight: { north: true, east: false, south: false, west: true },
         // topLeft: { north: false, east: true, south: true, west: false },
@@ -109,7 +116,7 @@ $(document).ready(function () {
         } else if (name == "cross") {
             // this.img = "<img src='assets/images/straight.png' class='straight'><img src='assets/images/straight.png' class='vertical-straight'>";
             this.class = "vertical-straight straight";
-        } 
+        }
         // if (name == "horizontal") {
         //     this.img = "<img src='assets/images/straight.png' class='straight'>";
         // } else if (name == "vertical") {
@@ -232,14 +239,24 @@ $(document).ready(function () {
             console.log(this.path);
             // this.path[x] = { [y]: pipe };
         }
+        this.reverse = function (direction) {
+            let currentPipe = $(".row[data-index='" + this.y + "']").find(".block[data-index='" + this.x + "']").find("div");
+            if (this.path[this.x][this.y].flow.normal != direction) {
+                $(currentPipe).addClass("reverse");
+            }
+        }
+        this.animate = function () {
+            $(".row[data-index='" + this.y + "']").find(".block[data-index='" + this.x + "']").find("div").addClass("anim");
+        }
         this.checkConnected = function () {
             // console.log("next x: " + x);
             // console.log("next y: " + y);
             // console.log($(".row[data-index='" + this.x + "']").find(".block[data-index='" + this.y + "']"));
-            $(".row[data-index='" + _this.y + "']").find(".block[data-index='" + _this.x + "']").find("div").addClass("anim");
+            // $(".row[data-index='" + _this.y + "']").find(".block[data-index='" + _this.x + "']").find("div").addClass("anim");
+            // $(".row[data-index='" + this.y + "']").find(".block[data-index='" + this.x + "']").find("div").addClass("anim");
             console.log(this.path);
             let pipe = this.path;
-            if (this.x + 1 == this.end.x && pipe[this.x][this.y].flow.hasOwnProperty("east")) {
+            if (this.x == this.end.x && pipe[this.x][this.y].flow.hasOwnProperty("east") && this.y == this.end.y) {
                 console.log("You won");
                 return false;
             } else if (this.direction == "east" && this.x + 1 < COLS) {
@@ -248,6 +265,7 @@ $(document).ready(function () {
                     this.setDirection(pipe[this.x + 1][this.y].flow.west);
                     // update position of water to next connected pipe
                     this.x += 1;
+                    this.reverse("west");
                     console.log("x: " + this.x + " | y: " + this.y);
                     return true;
                 }
@@ -256,6 +274,7 @@ $(document).ready(function () {
                     this.path[this.x - 1][this.y].passed = true;
                     this.setDirection(pipe[this.x - 1][this.y].flow.east);
                     this.x -= 1;
+                    this.reverse("east");
                     console.log("x: " + this.x + " | y: " + this.y);
                     return true;
                 }
@@ -264,6 +283,7 @@ $(document).ready(function () {
                     this.path[this.x][this.y - 1].passed = true;
                     this.setDirection(pipe[this.x][this.y - 1].flow.south);
                     this.y -= 1;
+                    this.reverse("south");
                     console.log("x: " + this.x + " | y: " + this.y);
                     return true;
                 }
@@ -272,6 +292,7 @@ $(document).ready(function () {
                     this.path[this.x][this.y + 1].passed = true;
                     this.setDirection(pipe[this.x][this.y + 1].flow.north);
                     this.y += 1;
+                    this.reverse("north");
                     console.log("x: " + this.x + " | y: " + this.y);
                     return true;
                 }
@@ -286,6 +307,8 @@ $(document).ready(function () {
         this.startFlow = function () {
             let flow = setInterval(function () {
                 // if (_this.checkConnected(_this.x+1, _this.y)) {
+                // $(".row[data-index='" + _this.y + "']").find(".block[data-index='" + _this.x + "']").find("div").addClass("anim");
+                _this.animate();
                 if (_this.checkConnected()) {
                     console.log("connected");
                     pass.play();
