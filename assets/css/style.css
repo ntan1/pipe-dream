@@ -29,6 +29,19 @@ header {
     transform: translate(-50%, -77%);
 }
 
+#msg-banner {
+    background-color: #57d457;
+    padding: 10px;
+    display: none;
+    position: absolute;
+    color: white;
+    font-size: 2em;
+    text-transform: uppercase;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -77%);
+}
+
 .row {
     display: flex;
     justify-content: center;

@@ -13,6 +13,7 @@ $(document).ready(function () {
     const TIME_TO_START = 10000;
     const WATER_SPEED = 2000;
     const WON = false;
+    let started = false;
     let score = 0;
     const vol = 0.4;
 
@@ -219,7 +220,7 @@ $(document).ready(function () {
             console.log(text + " x " + x);
             console.log(text + " y " + y);
             let row = $("#board").find(".row[data-index='" + y + "']");
-            let col = $(row).find("span[data-index='" + x + "']");
+            let col = $(row).find("div[data-index='" + x + "']");
             // $(col).html("<img src='assets/images/straight.png'>");
             $(col).html("<div class='end'>");
             return { x: x, y: y };
@@ -333,10 +334,14 @@ $(document).ready(function () {
         }
         let _this = this;
         this.startFlow = function () {
+            function doAnim() {
+                _this.animate();
+            }
+            doAnim();
             let flow = setInterval(function () {
+                setInterval(doAnim, WATER_SPEED);
                 // if (_this.checkConnected(_this.x+1, _this.y)) {
                 // $(".row[data-index='" + _this.y + "']").find(".block[data-index='" + _this.x + "']").find("div").addClass("anim");
-                _this.animate();
                 if (_this.checkConnected()) {
                     console.log("connected");
                     audio.pass.play();
@@ -345,6 +350,7 @@ $(document).ready(function () {
                 } else {
                     clearInterval(flow);
                 }
+                doAnim();
             }, WATER_SPEED);
         }
         this.setDirection("east");
@@ -359,35 +365,37 @@ $(document).ready(function () {
     console.log("start direction: " + water.direction);
 
     $("#board").on("click", ".block", function () {
-        let rowIndex = $(this).data("index");
-        let colIndex = $(this).parent().data("index");
-        if (!water.path[rowIndex][colIndex].passed) {
-            if ($(this).find("img").length > 0) {
-                score -= 50;
-                if (score < 0) {
-                    score = 0;
+        if (started) {
+            let rowIndex = $(this).data("index");
+            let colIndex = $(this).parent().data("index");
+            if (!water.path[rowIndex][colIndex].passed) {
+                if ($(this).find("img").length > 0) {
+                    score -= 50;
+                    if (score < 0) {
+                        score = 0;
+                    }
+                    $("#score").text(score);
                 }
-                $("#score").text(score);
+                // let type = pile.pile[VISIBLE_PIECES - 1].name;
+                // console.log(pile.pile[VISIBLE_PIECES - 1]);
+                // if (water.checkConnected(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1])) {
+                // $(this).html($(".current").find("img").clone());
+                $(this).html($(".current").removeClass("current"));
+                water.addToPath(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1]);
+                // }
+                pile.removePiece();
+                pile.generatePiece();
+                audio.placed.play();
+                audio.placed.currentTime = 0;
+                // console.log($(this).parent().data("index"));
+                // console.log($(this).data("index"));
+                updateBoardPile();
+                // let img = $(this).find("img").attr("src");
+                // $(this).find("img").attr({src: img.replace("png", "gif")});
+            } else {
+                audio.notAllowed.play();
+                audio.notAllowed.currentTime = 0;
             }
-            // let type = pile.pile[VISIBLE_PIECES - 1].name;
-            // console.log(pile.pile[VISIBLE_PIECES - 1]);
-            // if (water.checkConnected(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1])) {
-            // $(this).html($(".current").find("img").clone());
-            $(this).html($(".current").removeClass("current"));
-            water.addToPath(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1]);
-            // }
-            pile.removePiece();
-            pile.generatePiece();
-            audio.placed.play();
-            audio.placed.currentTime = 0;
-            // console.log($(this).parent().data("index"));
-            // console.log($(this).data("index"));
-            updateBoardPile();
-            // let img = $(this).find("img").attr("src");
-            // $(this).find("img").attr({src: img.replace("png", "gif")});
-        } else {
-            audio.notAllowed.play();
-            audio.notAllowed.currentTime = 0;
         }
     });
 
@@ -428,7 +436,7 @@ $(document).ready(function () {
             });
             board.append(divRow);
             for (let z = 0; z < COLS; z++) {
-                let block = $("<span>");
+                let block = $("<div>");
                 $(block).attr({
                     id: "block" + i + z,
                     class: "block",
@@ -443,6 +451,10 @@ $(document).ready(function () {
     $("#start").on("click", function () {
         audio.start.play();
         $(this).hide();
+        started = true;
+        $("#msg-banner").show();
+        $("#msg-banner").text("Start!");
+        $("#msg-banner").fadeOut(3000);
         setTimeout(function () {
             let flow = setTimeout(function () {
                 water.startFlow();
