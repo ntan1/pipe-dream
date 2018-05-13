@@ -55,8 +55,8 @@ header {
 .block {
     width: 100px;
     height: 100px;
-    border-bottom: 1px solid #272727;
-    border-right: 1px solid #272727;
+    border-bottom: 2px solid #272727;
+    border-right: 2px solid #272727;
     border-top: 2px solid #949494;
     border-left: 2px solid #949494;
     background-color: #797979;
@@ -94,7 +94,6 @@ header {
 .pile-block {
     border: 1px solid black;
     margin-top: 10px;
-    box-sizing: border-box;
 }
 
 .current {
