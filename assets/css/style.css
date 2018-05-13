@@ -1,3 +1,8 @@
+body {
+    font-family: 'Mukta Malar', sans-serif;
+    background-color: aliceblue;
+}
+
 h1 {
     font-size: 2em;
 }
@@ -50,8 +55,11 @@ header {
 .block {
     width: 100px;
     height: 100px;
-    border: 1px solid black;
-    background-color: white;
+    border-bottom: 1px solid #272727;
+    border-right: 1px solid #272727;
+    border-top: 2px solid #949494;
+    border-left: 2px solid #949494;
+    background-color: #797979;
     /* display: inline-block;
     padding: 0;
     margin: 0;
@@ -83,13 +91,22 @@ header {
     max-width: 100px;
 }
 
+.pile-block {
+    border: 1px solid black;
+    margin-top: 10px;
+    box-sizing: border-box;
+}
+
 .current {
     border: 2px solid black;
+    margin-top: 60px;
 }
 
 #board img {
     width: 100%;
 }
+
+/* pipe style */
 
 .bottom-left {
     transform: rotate(-90deg);
@@ -146,18 +163,6 @@ header {
     transform: scaleY(-1) rotate(270deg);
 }
 
-
-/* end no work */
-.reverse-x {
-    /* -moz-transform: scaleX(-1);
-    -o-transform: scaleX(-1);
-    -webkit-transform: scaleX(-1);
-    transform: scale(-1, 1); */
-    animation-direction: alternate-reverse;
-    filter: FlipH;
-    -ms-filter: "FlipH";
-}
-
 .curve {
     width: 100px;
     height: 100px;
@@ -207,14 +212,38 @@ header {
     animation-play-state: running;
 }
 
-.anim-curve {
-    animation: play 2s steps(24);
+/* animation */
+
+@keyframes play {
+    from {
+        background-position-x: 0px;
+    }
+    to {
+        background-position-x: -2400px;
+    }
 }
 
-.anim-straight {
-    animation: play-straight 2s steps(19);
+@keyframes play-straight {
+    from {
+        background-position-x: 0px;
+    }
+    to {
+        background-position-x: -1900px;
+    }
 }
 
+@keyframes play-end {
+    from {
+        background-position: 0px;
+    }
+    to {
+        background-position: -1400px;
+    }
+}
+
+
+
+/* test */
 .test-2 {
     width: 100px;
     height: 100px;
@@ -241,40 +270,4 @@ header {
 .test-img img {
     height: 100%;
     width: auto;
-}
-
-@keyframes play {
-    from {
-        background-position-x: 0px;
-    }
-    to {
-        background-position-x: -2400px;
-    }
-    /* 100% {
-        background-position: -2400px;
-    } */
-}
-
-@keyframes play-straight {
-    from {
-        background-position-x: 0px;
-    }
-    to {
-        background-position-x: -1900px;
-    }
-    /* 100% {
-        background-position: -1900px;
-    } */
-}
-
-@keyframes play-end {
-    from {
-        background-position: 0px;
-    }
-    to {
-        background-position: -1400px;
-    }
-    /* 100% {
-        background-position: -1400px;
-    } */
 }

@@ -10,6 +10,8 @@ $(document).ready(function () {
     const ROWS = 8;
     const COLS = 10;
     const VISIBLE_PIECES = 4;
+    const BLOCK_HEIGHT = 100;
+    const BLOCK_WIDTH = 100;
     const TIME_TO_START = 10000;
     const WATER_SPEED = 2000;
     const WON = false;
@@ -22,6 +24,7 @@ $(document).ready(function () {
         placed: new Audio("assets/sounds/yes.mp3"),
         notAllowed: new Audio("assets/sounds/no.mp3"),
         lose: new Audio("assets/sounds/lose.mp3"),
+        win: new Audio("assets/sounds/win.mp3"),
         start: new Audio("assets/sounds/start.mp3"),
         pass: new Audio("assets/sounds/pass.mp3")
     }
@@ -31,13 +34,8 @@ $(document).ready(function () {
         audio[sounds].volume = vol;
     }
     $("#bg-music")[0].volume = vol;
-    // const placed = new Audio("assets/sounds/yes.mp3");
-    // const notAllowed = new Audio("assets/sounds/no.mp3");
-    // const lose = new Audio("assets/sounds/lose.mp3");
-    // const start = new Audio("assets/sounds/start.mp3");
-    // const pass = new Audio("assets/sounds/pass.mp3");
 
-    // pieces, properties are directions for incoming flow and values are outgoing flow
+    // pieces holds objects. properties are directions for incoming flow and values are outgoing flow
     const pieceTypes = {
         // curved pieces
         topRight: {
@@ -84,15 +82,6 @@ $(document).ready(function () {
             normal: "west south", // FIND SOLN
             passed: false
         },
-        // topRight: { north: false, east: false, south: true, west: true },
-        // bottomRight: { north: true, east: false, south: false, west: true },
-        // topLeft: { north: false, east: true, south: true, west: false },
-        // bottomLeft: { north: true, east: true, south: false, west: false },
-        // // straight pieces
-        // vertical: { north: true, east: false, south: true, west: false },
-        // horizontal: { north: false, east: true, south: false, west: true },
-        // cross piece
-        //cross: { north: true, east: true, south: true, west: true }
     };
 
     const specialPieces = {
@@ -110,10 +99,6 @@ $(document).ready(function () {
         this.name = name;
         this.flow = type;
         this.passed = type.passed;
-        // this.north = type.north;
-        // this.east = type.east;
-        // this.south = type.south;
-        // this.west = type.west;
         if (name == "horizontal") {
             this.class = "straight";
         } else if (name == "vertical") {
@@ -133,28 +118,9 @@ $(document).ready(function () {
             // this.img = "<img src='assets/images/straight.png' class='straight'><img src='assets/images/straight.png' class='vertical-straight'>";
             this.class = "straight";
         }
-        // if (name == "horizontal") {
-        //     this.img = "<img src='assets/images/straight.png' class='straight'>";
-        // } else if (name == "vertical") {
-        //     this.img = "<img src='assets/images/straight.png' class='vertical-straight'>";
-        // } else if (name == "topRight") {
-        //     this.img = "<img src='assets/images/curve.png' class='top-right'>";
-        // } else if (name == "bottomRight") {
-        //     this.img = "<img src='assets/images/curve.png' class='bottom-right'>";
-        // } else if (name == "topLeft") {
-        //     this.img = "<img src='assets/images/curve.png' class='top-left'>";
-        // } else if (name == "bottomLeft") {
-        //     this.img = "<img src='assets/images/curve.png' class='bottom-left'>";
-        // } else if (name == "cross") {
-        //     // this.img = "<img src='assets/images/straight.png' class='straight'><img src='assets/images/straight.png' class='vertical-straight'>";
-        //     this.img = "<img src='assets/images/cross.png' class='vertical-straight'>";
-        // }
     }
-    // test = new Pipe(pieceTypes.topRight);
-    // console.log(test);
     createBoard();
     const pile = new Pile(VISIBLE_PIECES);
-    // console.log(pile.getPile());
     updateBoardPile();
 
     // Pile Object
@@ -287,6 +253,8 @@ $(document).ready(function () {
             let pipe = this.path;
             if (this.x == this.end.x && pipe[this.x][this.y].flow.hasOwnProperty("east") && this.y == this.end.y) {
                 console.log("You won");
+                $("#bg-music").get(0).pause();
+                audio.win.play();
                 return false;
             } else if (this.direction == "east" && this.x + 1 < COLS) {
                 if (pipe[this.x + 1][this.y].flow.hasOwnProperty("west")) {
@@ -349,6 +317,7 @@ $(document).ready(function () {
                     $("#score").text(score);
                 } else {
                     clearInterval(flow);
+                    started = false;
                 }
                 doAnim();
             }, WATER_SPEED);
@@ -380,7 +349,7 @@ $(document).ready(function () {
                 // console.log(pile.pile[VISIBLE_PIECES - 1]);
                 // if (water.checkConnected(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1])) {
                 // $(this).html($(".current").find("img").clone());
-                $(this).html($(".current").removeClass("current"));
+                $(this).html($(".current").removeClass("current pile-block"));
                 water.addToPath(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1]);
                 // }
                 pile.removePiece();
@@ -418,7 +387,7 @@ $(document).ready(function () {
             //     $(piece).addClass(pile.pile[i].class);
             // }
             $(piece).attr({ id: "next" + i });
-            $(piece).addClass(pile.pile[i].class);
+            $(piece).addClass(pile.pile[i].class + " pile-block");
             // $(piece).html(pile.pile[i].img);
             $("#pile").append(piece);
         }
