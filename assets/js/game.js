@@ -1,11 +1,8 @@
 // To do: countdown - setinterval
 // To do: levels, score, difficulty ramp
-// To do: fix cross img
-// To do: prevent all events till start clicked
 // To do: display board function for all html changes (fix score)
 
 $(document).ready(function () {
-
     // game settings
     const ROWS = 8;
     const COLS = 10;
@@ -18,7 +15,7 @@ $(document).ready(function () {
     let started = false;
     let score = 0;
     const vol = 0.4;
-
+    
     // sounds
     const audio = {
         placed: new Audio("assets/sounds/yes.mp3"),
@@ -28,13 +25,13 @@ $(document).ready(function () {
         start: new Audio("assets/sounds/start.mp3"),
         pass: new Audio("assets/sounds/pass.mp3")
     }
-
-    // reduce volume
+    
+    // lower sound volume
     for (let sounds in audio) {
         audio[sounds].volume = vol;
     }
     $("#bg-music")[0].volume = vol;
-
+    
     // pieces holds objects. properties are directions for incoming flow and values are outgoing flow
     const pieceTypes = {
         // curved pieces
@@ -42,48 +39,58 @@ $(document).ready(function () {
             south: "west",
             west: "south",
             normal: "west",
+            class: "curve top-right",
             passed: false
         },
         bottomRight: {
             north: "west",
             west: "north",
             normal: "north",
+            class: "curve bottom-right",
             passed: false
         },
         topLeft: {
             south: "east",
             east: "south",
             normal: "south",
+            class: "curve top-left",
             passed: false
         },
         bottomLeft: {
             north: "east",
             east: "north",
             normal: "east",
+            class: "curve bottom-left",
             passed: false
         },
+        // straight pieces
         vertical: {
             south: "north",
             north: "south",
             normal: "south",
+            class: "vertical-straight",
             passed: false
         },
         horizontal: {
             east: "west",
             west: "east",
             normal: "west",
+            class: "straight",
             passed: false
         },
+        // cross piece
         cross: {
             north: "south",
             south: "north",
             east: "west",
             west: "east",
-            normal: "west south", // FIND SOLN
+            normal: "west south",
+            class: "straight",
             passed: false
         },
     };
-
+    
+    // pieces not placed by the player
     const specialPieces = {
         end: {
             east: "west",
@@ -92,41 +99,20 @@ $(document).ready(function () {
             passed: false
         }
     };
-
-
-    // Pipe Object, sets appropriate image depending on piece type
+    
+    // Pipe Object, also sets appropriate class depending on piece type
     function Pipe(name, type) {
         this.name = name;
-        this.flow = type;
-        this.passed = type.passed;
-        if (name == "horizontal") {
-            this.class = "straight";
-        } else if (name == "vertical") {
-            this.class = "vertical-straight";
-        } else if (name == "topRight") {
-            this.class = "curve top-right";
-        } else if (name == "bottomRight") {
-            this.class = "curve bottom-right";
-        } else if (name == "topLeft") {
-            this.class = "curve top-left";
-        } else if (name == "bottomLeft") {
-            this.class = "curve bottom-left";
-        } else if (name == "end") {
-            // this.img = "<img src='assets/images/straight.png' class='straight'><img src='assets/images/straight.png' class='vertical-straight'>";
-            this.class = "end";
-        } else if (name == "cross") {
-            // this.img = "<img src='assets/images/straight.png' class='straight'><img src='assets/images/straight.png' class='vertical-straight'>";
-            this.class = "straight";
-        }
+        this.flow = type; // holds the respective type object from pieceTypes
+        this.passed = type.passed; // boolean, whether pipe has been used yet
+        this.class = type.class;
     }
-    createBoard();
-    const pile = new Pile(VISIBLE_PIECES);
-    updateBoardPile();
-
+    
+    
     // Pile Object
     function Pile(visible_pieces) {
         this.pile = [];
-        // generate new pipe piece and put to beginning or pile array
+        // generate new pipe piece and put to beginning of pile queue
         this.generatePiece = function () {
             let keys = Object.keys(pieceTypes);
             let type = keys[Math.floor(Math.random() * keys.length)];
@@ -140,22 +126,15 @@ $(document).ready(function () {
             this.pile.pop();
         }
         for (let i = 0; i < visible_pieces; i++) {
-            // generate random piece type
-            // let type = keys[Math.floor(Math.random() * keys.length)];
-            // console.log(type);
-            // let temp_pipe = new Pipe(type, pieceTypes[type]);
-            // this.pile.push(temp_pipe);
             this.generatePiece();
         }
     }
 
-
-
     // water object
-    // this object is a pointer to current position of water flow
+    // this object is a pointer to current position of the water
     function Water() {
-        this.path = [];
-        // temp fix for uncaught type error when accessing unset property of path array for checkConnected()
+        this.path = []; // 2d array storing location of every pipe placed
+        // fix for uncaught type error when accessing unset property of path array for checkConnected()
         this.resetPath = function () {
             for (let i = 0; i < COLS; i++) {
                 let arr = [];
@@ -166,9 +145,9 @@ $(document).ready(function () {
             }
         }
         // move to pile object? let pile handle generating start and end?
-        this.generatePoint = function (text) {
-            // let x = Math.floor(Math.random() * COLS);
-            let x;
+        // generates pipe on the board
+        this.generatePoint = function (text, type="end") {
+            let x = "";
             let y = Math.floor(Math.random() * ROWS);
             if (text === "start") {
                 x = 0;
@@ -177,57 +156,43 @@ $(document).ready(function () {
             } else {
                 x = Math.floor(Math.random() * COLS);
             }
-            let type = "end";
-            // this.path[x] = { [y]: new Pipe("horizontal", pieceTypes.horizontal) };
-            // this.path[x] = [];
-            // this.path[x][y] = new Pipe("horizontal", pieceTypes.horizontal);
-            this.addToPath(x, y, new Pipe("end", specialPieces.end));
+            this.addToPath(x, y, new Pipe(type, specialPieces[type]));
             this.path[x][y].passed = true;
-            console.log(text + " x " + x);
-            console.log(text + " y " + y);
             let row = $("#board").find(".row[data-index='" + y + "']");
             let col = $(row).find("div[data-index='" + x + "']");
-            // $(col).html("<img src='assets/images/straight.png'>");
-            $(col).html("<div class='end'>");
+            $(col).html($("<div>").addClass(type));
             return { x: x, y: y };
         }
         // future: set direction to either flow of starting pipe
+        // set direction of water flow
         this.setDirection = function (direction = "") {
-            if (direction == "") {
+            if (direction === "") {
                 let directions = ["north", "east", "south", "west"];
                 this.direction = directions[Math.floor(Math.random() * 4)];
             } else {
                 this.direction = direction;
             }
         }
+        // adds placed pipe to the path
         this.addToPath = function (x, y, pipe) {
-            // let temp_data;
-            // if (this.path[x] === undefined) {
-            //     temp_data = {};
-            //     temp_data[y] = pipe;
-            // } else {
-            //     temp_data = this.path[x];
-            //     temp_data[y] = pipe;
-            // }
-            let temp_data;
+            let temp_data = [];
             if (this.path[x] === undefined) {
-                temp_data = [];
                 temp_data[y] = pipe;
             } else {
-                temp_data = this.path[x];
-                temp_data[y] = pipe;
+                temp_data = this.path[x]; // get the row
+                temp_data[y] = pipe; // assign the pipe to the col
             }
             this.path[x] = temp_data;
-            console.log(this.path);
-            // this.path[x] = { [y]: pipe };
         }
+        // checks if water flow is opposite of standard flow of the pipe
+        // and reverses water flow direction in animation if so
         this.reverse = function (direction) {
             let currentPipe = $(".row[data-index='" + this.y + "']").find(".block[data-index='" + this.x + "']").find("div");
             if (!this.path[this.x][this.y].flow.normal.includes(direction)) {
-                if (this.path[this.x][this.y].name == "cross") {
-                    if (direction == "east") {
+                if (this.path[this.x][this.y].name === "cross") {
+                    if (direction === "east") {
                         currentPipe.addClass("reverse");
-                    } else if (direction == "north") {
+                    } else if (direction === "north") {
                         currentPipe.find("div").addClass("reverse");
                     }
                 } else {
@@ -235,62 +200,55 @@ $(document).ready(function () {
                 }
             }
         }
+        // add anim class to pipe which sets animation-play-state to running
         this.animate = function () {
             let currentPipe = $(".row[data-index='" + this.y + "']").find(".block[data-index='" + this.x + "']").find("div")
-            if (["north", "south"].includes(this.direction) && this.path[this.x][this.y].name == "cross") {
+            if (["north", "south"].includes(this.direction) && this.path[this.x][this.y].name === "cross") {
                 $(currentPipe).find("div").addClass("anim-vert-cross");
             } else {
                 $(currentPipe).addClass("anim");
             }
         }
+        // checks if next pipe is connected to current pipe where water is
         this.checkConnected = function () {
-            // console.log("next x: " + x);
-            // console.log("next y: " + y);
-            // console.log($(".row[data-index='" + this.x + "']").find(".block[data-index='" + this.y + "']"));
-            // $(".row[data-index='" + _this.y + "']").find(".block[data-index='" + _this.x + "']").find("div").addClass("anim");
-            // $(".row[data-index='" + this.y + "']").find(".block[data-index='" + this.x + "']").find("div").addClass("anim");
-            console.log(this.path);
             let pipe = this.path;
-            if (this.x == this.end.x && pipe[this.x][this.y].flow.hasOwnProperty("east") && this.y == this.end.y) {
+            // check if at end pipe
+            if (this.x === this.end.x && pipe[this.x][this.y].flow.hasOwnProperty("east") && this.y === this.end.y) {
                 console.log("You won");
                 $("#bg-music").get(0).pause();
                 audio.win.play();
                 return false;
-            } else if (this.direction == "east" && this.x + 1 < COLS) {
+            } else if (this.direction === "east" && this.x + 1 < COLS) {
                 if (pipe[this.x + 1][this.y].flow.hasOwnProperty("west")) {
                     this.path[this.x + 1][this.y].passed = true;
                     this.setDirection(pipe[this.x + 1][this.y].flow.west);
                     // update position of water to next connected pipe
                     this.x += 1;
                     this.reverse("west");
-                    console.log("x: " + this.x + " | y: " + this.y);
                     return true;
                 }
-            } else if (this.direction == "west" && this.x - 1 >= 0) {
+            } else if (this.direction === "west" && this.x - 1 >= 0) {
                 if (pipe[this.x - 1][this.y].flow.hasOwnProperty("east")) {
                     this.path[this.x - 1][this.y].passed = true;
                     this.setDirection(pipe[this.x - 1][this.y].flow.east);
                     this.x -= 1;
                     this.reverse("east");
-                    console.log("x: " + this.x + " | y: " + this.y);
                     return true;
                 }
-            } else if (this.direction == "north" && this.y - 1 >= 0) {
+            } else if (this.direction === "north" && this.y - 1 >= 0) {
                 if (pipe[this.x][this.y - 1].flow.hasOwnProperty("south")) {
                     this.path[this.x][this.y - 1].passed = true;
                     this.setDirection(pipe[this.x][this.y - 1].flow.south);
                     this.y -= 1;
                     this.reverse("south");
-                    console.log("x: " + this.x + " | y: " + this.y);
                     return true;
                 }
-            } else if (this.direction == "south" && this.y + 1 < ROWS) {
+            } else if (this.direction === "south" && this.y + 1 < ROWS) {
                 if (pipe[this.x][this.y + 1].flow.hasOwnProperty("north")) {
                     this.path[this.x][this.y + 1].passed = true;
                     this.setDirection(pipe[this.x][this.y + 1].flow.north);
                     this.y += 1;
                     this.reverse("north");
-                    console.log("x: " + this.x + " | y: " + this.y);
                     return true;
                 }
             }
@@ -300,6 +258,7 @@ $(document).ready(function () {
             audio.lose.play();
             return false;
         }
+        // allowing to use this water object in below setInterval scope
         let _this = this;
         this.startFlow = function () {
             function doAnim() {
@@ -308,10 +267,7 @@ $(document).ready(function () {
             doAnim();
             let flow = setInterval(function () {
                 setInterval(doAnim, WATER_SPEED);
-                // if (_this.checkConnected(_this.x+1, _this.y)) {
-                // $(".row[data-index='" + _this.y + "']").find(".block[data-index='" + _this.x + "']").find("div").addClass("anim");
                 if (_this.checkConnected()) {
-                    console.log("connected");
                     audio.pass.play();
                     score += 100;
                     $("#score").text(score);
@@ -329,52 +285,32 @@ $(document).ready(function () {
         this.x = this.start.x;
         this.y = this.start.y;
     }
-
-    const water = new Water();
-    console.log("start direction: " + water.direction);
-
+    
     $("#board").on("click", ".block", function () {
         if (started) {
             let rowIndex = $(this).data("index");
             let colIndex = $(this).parent().data("index");
             if (!water.path[rowIndex][colIndex].passed) {
-                if ($(this).find("img").length > 0) {
-                    score -= 50;
-                    if (score < 0) {
-                        score = 0;
-                    }
-                    $("#score").text(score);
-                }
-                // let type = pile.pile[VISIBLE_PIECES - 1].name;
-                // console.log(pile.pile[VISIBLE_PIECES - 1]);
-                // if (water.checkConnected(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1])) {
-                // $(this).html($(".current").find("img").clone());
                 $(this).html($(".current").removeClass("current pile-block"));
                 water.addToPath(rowIndex, colIndex, pile.pile[VISIBLE_PIECES - 1]);
-                // }
                 pile.removePiece();
                 pile.generatePiece();
                 audio.placed.play();
                 audio.placed.currentTime = 0;
-                // console.log($(this).parent().data("index"));
-                // console.log($(this).data("index"));
                 updateBoardPile();
-                // let img = $(this).find("img").attr("src");
-                // $(this).find("img").attr({src: img.replace("png", "gif")});
             } else {
                 audio.notAllowed.play();
                 audio.notAllowed.currentTime = 0;
             }
         }
     });
-
+    
     // update pile in document
     function updateBoardPile() {
         $("#pile").html("");
         for (let i = 0; i < pile.pile.length; i++) {
             let piece = $("<div>");
             if (i === pile.pile.length - 1) {
-                // $(piece).attr({ id: "next" + i });
                 $(piece).addClass("current");
             }
             if (pile.pile[i].name === "cross") {
@@ -382,17 +318,12 @@ $(document).ready(function () {
                 $(horizontal).addClass("vertical-cross vertical-straight");
                 $(piece).html(horizontal);
             }
-            // else {
-            //     $(piece).attr({ id: "next" + i });
-            //     $(piece).addClass(pile.pile[i].class);
-            // }
             $(piece).attr({ id: "next" + i });
             $(piece).addClass(pile.pile[i].class + " pile-block");
-            // $(piece).html(pile.pile[i].img);
             $("#pile").append(piece);
         }
     }
-
+    
     // create board
     function createBoard() {
         let board = $("#board");
@@ -411,12 +342,11 @@ $(document).ready(function () {
                     class: "block",
                     "data-index": z
                 });
-                // $(block).text("P");
                 board.find("#row" + i).append(block);
             }
         }
     }
-
+    
     $("#start").on("click", function () {
         audio.start.play();
         $(this).hide();
@@ -432,4 +362,8 @@ $(document).ready(function () {
         }, audio.start.duration * 1000);
     })
 
+    createBoard();
+    const pile = new Pile(VISIBLE_PIECES);
+    updateBoardPile();
+    const water = new Water();
 });

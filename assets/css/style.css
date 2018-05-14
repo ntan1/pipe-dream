@@ -239,34 +239,3 @@ header {
         background-position: -1400px;
     }
 }
-
-
-
-/* test */
-.test-2 {
-    width: 100px;
-    height: 100px;
-    background: url("../images/straight-full.png") right center no-repeat; 
-    animation: play-straight 1s steps(19);
-    background-size: auto 100%;
-}
-
-.test-vertical {
-    transform: rotate(270deg);
-    width: 100px;
-    height: 100px;
-    background: url("../images/straight-full.png") right center no-repeat; 
-    animation: play-straight 1s steps(19);
-    background-size: auto 100%;
-}
-
-.test-img {
-    width: 100px;
-    height: 100px;
-    overflow: hidden;
-}
-
-.test-img img {
-    height: 100%;
-    width: auto;
-}
