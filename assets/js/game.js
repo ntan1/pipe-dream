@@ -14,8 +14,9 @@ $(document).ready(function () {
     const WON = false;
     let started = false;
     let score = 0;
+    let time = TIME_TO_START / 1000;
     const vol = 0.4;
-    
+
     // sounds
     const audio = {
         placed: new Audio("assets/sounds/yes.mp3"),
@@ -25,13 +26,13 @@ $(document).ready(function () {
         start: new Audio("assets/sounds/start.mp3"),
         pass: new Audio("assets/sounds/pass.mp3")
     }
-    
+
     // lower sound volume
     for (let sounds in audio) {
         audio[sounds].volume = vol;
     }
     $("#bg-music")[0].volume = vol;
-    
+
     // pieces holds objects. properties are directions for incoming flow and values are outgoing flow
     const pieceTypes = {
         // curved pieces
@@ -89,7 +90,7 @@ $(document).ready(function () {
             passed: false
         },
     };
-    
+
     // pieces not placed by the player
     const specialPieces = {
         end: {
@@ -99,7 +100,7 @@ $(document).ready(function () {
             passed: false
         }
     };
-    
+
     // Pipe Object, also sets appropriate class depending on piece type
     function Pipe(name, type) {
         this.name = name;
@@ -107,8 +108,8 @@ $(document).ready(function () {
         this.passed = type.passed; // boolean, whether pipe has been used yet
         this.class = type.class;
     }
-    
-    
+
+
     // Pile Object
     function Pile(visible_pieces) {
         this.pile = [];
@@ -146,7 +147,7 @@ $(document).ready(function () {
         }
         // move to pile object? let pile handle generating start and end?
         // generates pipe on the board
-        this.generatePoint = function (text, type="end") {
+        this.generatePoint = function (text, type = "end") {
             let x = "";
             let y = Math.floor(Math.random() * ROWS);
             if (text === "start") {
@@ -285,7 +286,7 @@ $(document).ready(function () {
         this.x = this.start.x;
         this.y = this.start.y;
     }
-    
+
     $("#board").on("click", ".block", function () {
         if (started) {
             let rowIndex = $(this).data("index");
@@ -304,7 +305,7 @@ $(document).ready(function () {
             }
         }
     });
-    
+
     // update pile in document
     function updateBoardPile() {
         $("#pile").html("");
@@ -323,7 +324,7 @@ $(document).ready(function () {
             $("#pile").append(piece);
         }
     }
-    
+
     // create board
     function createBoard() {
         let board = $("#board");
@@ -346,7 +347,7 @@ $(document).ready(function () {
             }
         }
     }
-    
+
     $("#start").on("click", function () {
         audio.start.play();
         $(this).hide();
@@ -355,6 +356,14 @@ $(document).ready(function () {
         $("#msg-banner").text("Start!");
         $("#msg-banner").fadeOut(3000);
         setTimeout(function () {
+            doCountdown();
+            let countdown = setInterval(function () {
+                if (time >= 0) {
+                    doCountdown();
+                } else {
+                    clearInterval(countdown);
+                }
+            }, 1000);
             let flow = setTimeout(function () {
                 water.startFlow();
             }, TIME_TO_START);
@@ -362,8 +371,14 @@ $(document).ready(function () {
         }, audio.start.duration * 1000);
     })
 
+    function doCountdown(countdown) {
+        $("#time").text(time);
+        time--;
+    }
+    
     createBoard();
     const pile = new Pile(VISIBLE_PIECES);
     updateBoardPile();
     const water = new Water();
+    $("#time").text(time);
 });

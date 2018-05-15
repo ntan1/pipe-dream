@@ -7,6 +7,15 @@ h1 {
     font-size: 2em;
 }
 
+h2 {
+    font-size: 1.5em;
+}
+
+ul {
+    list-style-type: disc;
+    color: black;
+}
+
 main {
     text-align: center;
     position: relative;
@@ -15,9 +24,10 @@ main {
 header {
     text-align: center;
     margin-bottom: 20px;
+    margin-top: 20px;
 }
 
-#board {
+#cover {
     text-align: center;
 }
 
@@ -30,7 +40,7 @@ header {
     font-size: 2em;
     text-transform: uppercase;
     cursor: pointer;
-    top: 50%;
+    top: 40%;
     transform: translate(-50%, -77%);
 }
 
@@ -42,7 +52,7 @@ header {
     color: white;
     font-size: 2em;
     text-transform: uppercase;
-    top: 50%;
+    top: 40%;
     left: 50%;
     transform: translate(-50%, -77%);
 }
@@ -87,6 +97,15 @@ header {
     right: 0;
 }
 
+#score, #time {
+    font-size: 1.5em;
+    margin: 5px;
+}
+
+.game-info {
+    margin: 20px;
+}
+
 #pile {
     max-width: 100px;
 }
@@ -103,6 +122,17 @@ header {
 
 #board img {
     width: 100%;
+}
+
+.instructions {
+    margin: 30px;
+}
+
+.instructions ul {
+    display: inline-block;
+    text-align: left;
+    margin: 20px;
+    line-height: 1.5em;
 }
 
 /* pipe style */

@@ -18,19 +18,48 @@
     <main id="game">
         <button id="start">Start</button>
         <div id="msg-banner">start</div>
-        <div id="board">
+        <div id="cover">
             <aside class="sidebar left">
                 <h2>Pile</h2>
                 <div id="pile">
                 </div>
             </aside>
             <aside class="sidebar right">
-                <h2>Score</h2>
-                <div id="score">0
+                <div class="game-info">
+                    <h2>Score</h2>
+                    <div id="score">0
+                    </div>
+                </div>
+                <div class="game-info">
+                    <h2>Time</h2>
+                    <div id="time">0
+                    </div>
                 </div>
             </aside>
+            <div id="board"></div>
         </div>
         <audio id="bg-music" type="audio/mp3" src="assets/sounds/BGM_02.mp3" controls loop></audio>
+        <div class="instructions">
+            <h2>Instructions</h2>
+            <ul>
+                <li>
+                    Connect the starting pipe (left most pipe) with the end pipe (right most pipe) by clicking on the squares.
+                </li>
+                <li>
+                    The Pile of pipes on the left is a queue of pipe types with the lowest pipe being the top of the queue.
+                </li>
+                <li>
+                    Placing a pipe on a square will move the pipe from the top of the queue to the square and replace the existing pipe if the
+                    square is not empty
+                </li>
+                <li>
+                    You can only replace pipes that haven't been passed by water yet.
+                </li>
+                <li>
+                    The longer the path from start to end the higher the score will be.
+                </li>
+            </ul>
+        </div>
     </main>
     <script src="https://code.jquery.com/jquery-3.1.0.js"></script>
     <script src="assets/js/game.js"></script>
