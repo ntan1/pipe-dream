@@ -45,16 +45,17 @@ header {
 }
 
 #msg-banner {
-    background-color: #57d457;
-    padding: 10px;
+    background-color: rgb(87, 212, 87, 0.9);
+    padding: 20px;
     display: none;
+    width: 100%;
     position: absolute;
     color: white;
-    font-size: 2em;
     text-transform: uppercase;
     top: 40%;
     left: 50%;
     transform: translate(-50%, -77%);
+    z-index: 100;
 }
 
 .row {

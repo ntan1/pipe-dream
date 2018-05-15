@@ -218,6 +218,7 @@ $(document).ready(function () {
                 console.log("You won");
                 $("#bg-music").get(0).pause();
                 audio.win.play();
+                displayBanner("You Win!", "rgb(87, 212, 87, 0.9)");
                 return false;
             } else if (this.direction === "east" && this.x + 1 < COLS) {
                 if (pipe[this.x + 1][this.y].flow.hasOwnProperty("west")) {
@@ -257,6 +258,7 @@ $(document).ready(function () {
             console.log("You lose");
             $("#bg-music").get(0).pause();
             audio.lose.play();
+            displayBanner("You Lose", "rgba(199, 30, 30, 0.9)");
             return false;
         }
         // allowing to use this water object in below setInterval scope
@@ -348,13 +350,22 @@ $(document).ready(function () {
         }
     }
 
+    function displayBanner(text, bgColor) {
+        if (text !== "") {
+            $("#msg-banner").html("<h1>" + text + "</h1>");
+        }
+        if(bgColor !== "") {
+            $("#msg-banner").css({"background-color": bgColor});
+        }
+        $("#msg-banner").show()
+        $("#msg-banner").fadeOut(3000);
+    }
+
     $("#start").on("click", function () {
         audio.start.play();
         $(this).hide();
         started = true;
-        $("#msg-banner").show();
-        $("#msg-banner").text("Start!");
-        $("#msg-banner").fadeOut(3000);
+        displayBanner("", "rgb(87, 212, 87, 0.9)");
         setTimeout(function () {
             doCountdown();
             let countdown = setInterval(function () {
@@ -375,7 +386,7 @@ $(document).ready(function () {
         $("#time").text(time);
         time--;
     }
-    
+
     createBoard();
     const pile = new Pile(VISIBLE_PIECES);
     updateBoardPile();
