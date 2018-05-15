@@ -31,13 +31,16 @@ header {
     text-align: center;
 }
 
-#start {
+button {
     background-color: #57d457;
     border: 2px solid black;
     padding: 10px;
     position: absolute;
     color: white;
-    font-size: 2em;
+    font-family: 'Mukta Malar', sans-serif;
+    font-weight: bold;
+    letter-spacing: 12px;
+    text-indent: 12px;
     text-transform: uppercase;
     cursor: pointer;
     top: 40%;
@@ -98,13 +101,13 @@ header {
     right: 0;
 }
 
-#score, #time {
-    font-size: 1.5em;
-    margin: 5px;
-}
-
 .game-info {
     margin: 20px;
+}
+
+.game-info-text {
+    font-size: 1.5em;
+    margin: 5px;
 }
 
 #pile {

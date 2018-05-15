@@ -9,11 +9,12 @@ $(document).ready(function () {
     const VISIBLE_PIECES = 4;
     const BLOCK_HEIGHT = 100;
     const BLOCK_WIDTH = 100;
-    const TIME_TO_START = 10000;
+    const TIME_TO_START = 15000;
     const WATER_SPEED = 2000;
     const WON = false;
     let started = false;
     let score = 0;
+    let level = 1;
     let time = TIME_TO_START / 1000;
     const vol = 0.4;
 
