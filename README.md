@@ -1,12 +1,13 @@
 # Pipe Dream
 
+Connect the start (left most pipe) to end pipes (right most pipe) before the water catches up and spills!
+
 ## Instructions
 
-- Connect the starting pipe (left most pipe) with the end pipe (right most pipe) by clicking on the squares.
-- The Pile of pipes on the left is a queue of pipe types with the lowest pipe being the top of the queue.
-- Placing a pipe on a square will move the pipe from the top of the queue to the square and replace the existing pipe if the square is not empty
-- You can only replace pipes that haven't been passed by water yet.
-- The longer the path from start to end the higher the score will be.
+- Construct a path out of pipes from the pile and place them by clicking on the squares on the board
+- Water starts flowing when time reaches 0
+- Pipes can be replaced if water hasn't passed through them yet
+- The longer the path from start to end the higher the score will be
 
 ## Usage
 

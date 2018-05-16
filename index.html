@@ -21,7 +21,9 @@
         </button>
         <div id="cover">
             <aside class="sidebar left">
-                <div class="game-info"><h2>Pile</h2></div>
+                <div class="game-info">
+                    <h2>Pile</h2>
+                </div>
                 <div id="pile">
                 </div>
             </aside>
@@ -54,22 +56,11 @@
     <div class="instructions">
         <h2>Instructions</h2>
         <ul>
-            <li>
-                Connect the starting pipe (left most pipe) with the end pipe (right most pipe) by clicking on the squares.
-            </li>
-            <li>
-                The Pile of pipes on the left is a queue of pipe types with the lowest pipe being the top of the queue.
-            </li>
-            <li>
-                Placing a pipe on a square will move the pipe from the top of the queue to the square and replace the existing pipe if the
-                square is not empty
-            </li>
-            <li>
-                You can only replace pipes that haven't been passed by water yet.
-            </li>
-            <li>
-                The longer the path from start to end the higher the score will be.
-            </li>
+            <li>Connect the start (left most pipe) to end pipes (right most pipe) before the water catches up and spills!</li>
+            <li>Construct a path out of pipes from the pile and place them by clicking on the squares on the board</li>
+            <li>Water starts flowing when time reaches 0</li>
+            <li>Pipes can be replaced if water hasn't passed through them yet</li>
+            <li>The longer the path from start to end the higher the score will be</li>
         </ul>
     </div>
     <script src="https://code.jquery.com/jquery-3.1.0.js"></script>

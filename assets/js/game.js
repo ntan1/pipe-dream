@@ -1,5 +1,5 @@
 // To do: countdown - setinterval
-// To do: levels, score, difficulty ramp
+// To do: levels, score, difficulty ramp (min length of path increases)
 // To do: display board function for all html changes (fix score)
 // To do: refactor code to use block id instead of row and col data-index
 
