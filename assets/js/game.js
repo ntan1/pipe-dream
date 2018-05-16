@@ -19,6 +19,11 @@ $(document).ready(function () {
     let level = 1;
     let time = TIME_TO_START / 1000;
     const vol = 0.4;
+    const bgColors = {
+        msg: "rgba(87, 162, 212, 0.9)",
+        lose: "rgba(199, 30, 30, 0.9)",
+        win: "rgb(87, 212, 87, 0.9)"
+    }
 
     // sounds
     const audio = {
@@ -167,6 +172,13 @@ $(document).ready(function () {
             $(col).html($("<div>").addClass(type));
             return { x: x, y: y };
         }
+        this.generateEnds = function () {
+            this.setDirection("east");
+            this.start = this.generatePoint("start");
+            this.end = this.generatePoint("end");
+            this.x = this.start.x;
+            this.y = this.start.y;
+        }
         // future: set direction to either flow of starting pipe
         // set direction of water flow
         this.setDirection = function (direction = "") {
@@ -221,7 +233,11 @@ $(document).ready(function () {
                 console.log("You won");
                 $("#bg-music").get(0).pause();
                 audio.win.play();
-                displayBanner("You Win!", "rgb(87, 212, 87, 0.9)");
+                // displayBanner("You Win!", bgColors.win);
+                started = false;
+                setTimeout(function () {
+                    toNextLevel();
+                }, audio.win.duration * 1000);
                 return false;
             } else if (this.direction === "east" && this.x + 1 < COLS) {
                 if (pipe[this.x + 1][this.y].flow.hasOwnProperty("west")) {
@@ -261,7 +277,7 @@ $(document).ready(function () {
             console.log("You lose");
             $("#bg-music").get(0).pause();
             audio.lose.play();
-            displayBanner("You Lose", "rgba(199, 30, 30, 0.9)");
+            displayBanner("You Lose", bgColors.lose);
             return false;
         }
         // allowing to use this water object in below setInterval scope
@@ -271,25 +287,22 @@ $(document).ready(function () {
                 _this.animate();
             }
             doAnim();
+            let animFlow = setInterval(doAnim, WATER_SPEED);
             let flow = setInterval(function () {
-                setInterval(doAnim, WATER_SPEED);
                 if (_this.checkConnected()) {
                     audio.pass.play();
                     score += 100;
                     $("#score").text(score);
                 } else {
+                    clearInterval(animFlow);
                     clearInterval(flow);
                     started = false;
                 }
                 doAnim();
             }, WATER_SPEED);
         }
-        this.setDirection("east");
         this.resetPath();
-        this.start = this.generatePoint("start");
-        this.end = this.generatePoint("end");
-        this.x = this.start.x;
-        this.y = this.start.y;
+        this.generateEnds();
     }
 
     $("#board").on("click", ".block", function () {
@@ -357,8 +370,8 @@ $(document).ready(function () {
         if (text !== "") {
             $("#msg-banner").html("<h1>" + text + "</h1>");
         }
-        if(bgColor !== "") {
-            $("#msg-banner").css({"background-color": bgColor});
+        if (bgColor !== "") {
+            $("#msg-banner").css({ "background-color": bgColor });
         }
         $("#msg-banner").show()
         $("#msg-banner").fadeOut(3000);
@@ -368,26 +381,56 @@ $(document).ready(function () {
         audio.start.play();
         $(this).hide();
         started = true;
-        displayBanner("", "rgb(87, 212, 87, 0.9)");
+        displayBanner("Level " + level, bgColors.msg);
         setTimeout(function () {
             doCountdown();
-            let countdown = setInterval(function () {
-                if (time >= 0) {
-                    doCountdown();
-                } else {
-                    clearInterval(countdown);
-                }
-            }, 1000);
+            // let countdown = setInterval(function () {
+            //     if (time >= 0) {
+            //         doCountdown();
+            //     } else {
+            //         clearInterval(countdown);
+            //     }
+            // }, 1000);
             let flow = setTimeout(function () {
-                water.startFlow();
+                water.startFlow(flow);
             }, TIME_TO_START);
             $("#bg-music").get(0).play(); // get(0) audio object from element
         }, audio.start.duration * 1000);
     })
 
-    function doCountdown(countdown) {
+    function doCountdown() {
         $("#time").text(time);
         time--;
+        let countdown = setInterval(function () {
+            if (time >= 0) {
+                $("#time").text(time);
+                time--;
+            } else {
+                clearInterval(countdown);
+            }
+        }, 1000);
+    }
+
+    function toNextLevel() {
+        $("#board").html("");
+        createBoard();
+        water.resetPath();
+        water.generateEnds();
+        level++;
+        $("#level").text(level);
+        time = TIME_TO_START / 1000 - (level - 1) > 1 ? TIME_TO_START / 1000 - (level - 1) : 1;
+        // time = TIME_TO_START / 1000;
+        $("#time").text(time);
+        displayBanner("level " + level, bgColors.msg);
+        audio.start.play();
+        started = true;
+        setTimeout(function () {
+            let flow = setTimeout(function () {
+                water.startFlow();
+            }, time * 1000);
+            $("#bg-music").get(0).play();
+            doCountdown();
+        }, audio.start.duration * 1000);
     }
 
     createBoard();
